@@ -1,4 +1,4 @@
-package gifshow.yxcorp.com.kwaibutaswipeback;
+package com.kumaxiong;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.moudle_activity_main);
     initView();
-
   }
 
   private void initView() {

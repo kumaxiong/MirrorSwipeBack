@@ -1,4 +1,4 @@
-package gifshow.yxcorp.com.kwaibutaswipeback.view;
+package com.kumaxiong;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,14 +13,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewParent;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
-public class SwipeBackFrameLayout extends LinearLayout {
+public class MirrorSwipeBackLayout extends FrameLayout {
 
   private static final String TAG = "SwipeBack@xiong";
   private float mStartX;
   private float mStartY;
-  private float mCurrentY;
   private float mCurrentX;
   private boolean mHasJudged = false;
   private float progress;
@@ -36,18 +35,29 @@ public class SwipeBackFrameLayout extends LinearLayout {
   private boolean mIsRightSwipeEnable = true;
   private boolean mIsLeftSwipeEnable = true;
   private final float mSwipeMaximum = 0.6665f;
+  private Context mContext;
+  private int mStartMarginDP = 30;//dp
+  private int mAmplitudeDP = 90;
 
+  private float mAmplitude;
+  private float mHeight;
+  private float mSineWidth;
+  private float mSineIndex;
+  private float mSineTheta;
+  private float valueSineStart;
+  private float sineLineStartY;
 
-  public SwipeBackFrameLayout(@NonNull Context context) {
+  public MirrorSwipeBackLayout(@NonNull Context context) {
     this(context, null);
   }
 
-  public SwipeBackFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+  public MirrorSwipeBackLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
     this(context, attrs, 0);
   }
 
-  public SwipeBackFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public MirrorSwipeBackLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    mContext = context;
     initDrawTool();
   }
 
@@ -66,18 +76,10 @@ public class SwipeBackFrameLayout extends LinearLayout {
   }
 
 
-
   @Override
   public boolean onInterceptTouchEvent(MotionEvent ev) {
-    return mHasJudged || super.onInterceptTouchEvent(ev);
-  }
-
-
-  @Override
-  public boolean dispatchTouchEvent(MotionEvent ev) {
     switch (ev.getActionMasked()) {
       case MotionEvent.ACTION_DOWN: {
-        disallowParentsInterceptTouchEvent(getParent());
         mHasJudged = false;
         mStartX = ev.getX();
         mStartY = ev.getY();
@@ -85,35 +87,30 @@ public class SwipeBackFrameLayout extends LinearLayout {
         mIsRightStart = isRightStart(mStartX);
         break;
       }
-      case MotionEvent.ACTION_MOVE: {
-        if (!mIsLeftStart && !mIsRightStart) {
-          break;
-        }
-        mCurrentX = ev.getX();
-        mCurrentY = ev.getY();
-        if (!mHasJudged) {
-          float distanceX = Math.abs(mCurrentX - mStartX);
-          if (distanceX > 30) {
-            allowParentsInterceptTouchEvent(getParent());
-            mHasJudged = true;
-          }
-        }
-        // 大于30开始画图
-        if (mHasJudged) {
-          postInvalidateDelayed(0);
-        }
-        break;
-      }
-      case MotionEvent.ACTION_UP:
-        break;
     }
-    return super.dispatchTouchEvent(ev);
+    return (mIsLeftStart && mIsLeftSwipeEnable) || (mIsRightStart && mIsRightSwipeEnable)|| super.onInterceptTouchEvent(ev);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
   @Override
   public boolean onTouchEvent(MotionEvent event) {
+    disallowParentsInterceptTouchEvent(getParent());
     switch (event.getAction()) {
+      case MotionEvent.ACTION_MOVE: {
+          mCurrentX = event.getX();
+          if (!mHasJudged) {
+            float distanceX = Math.abs(mCurrentX - mStartX);
+            if (distanceX > 30) {
+              allowParentsInterceptTouchEvent(getParent());
+              mHasJudged = true;
+            }
+          }
+          // 大于30开始画图
+          if (mHasJudged) {
+            postInvalidateDelayed(0);
+          }
+          break;
+      }
       case MotionEvent.ACTION_UP: {
         progress = calculateProgress();
         if (progress > 0.9 * 0.665 && (mIsLeftStart || mIsRightStart)) {
@@ -131,11 +128,11 @@ public class SwipeBackFrameLayout extends LinearLayout {
 
 
   private boolean isLeftStart(float startX) {
-    return mIsLeftSwipeEnable && startX < 50;
+    return mIsLeftSwipeEnable && startX < dip2px(mStartMarginDP);
   }
 
   private boolean isRightStart(float startX) {
-    return mIsRightSwipeEnable && startX > getWidth() - 50;
+    return mIsRightSwipeEnable && startX > getWidth() - dip2px(mStartMarginDP);
   }
 
   private void disallowParentsInterceptTouchEvent(ViewParent parent) {
@@ -182,39 +179,40 @@ public class SwipeBackFrameLayout extends LinearLayout {
         resetAll();
       }
     }
-    float amplitude = 30 * progress * 1.5f;
-    float height = 60 * progress * 1.5f;
-    float width = getHeight() / 5;
-    float index = 0;
-    float valueSineStart = 0;
-    float sineLineStartY = mStartY - 1.9f / 3f * width;
-    float mTheta = 30;
+    int initAmplitude = dip2px(12);
+    mAmplitude = initAmplitude * progress * 1.5f;
+    mHeight =  initAmplitude * 2 * progress * 1.5f;
+    mSineWidth = dip2px(135);
+    mSineIndex = 0;
+    mSineTheta = 30;
+    valueSineStart = 0;
+    sineLineStartY = mStartY - 1.9f / 3f * mSineWidth;
     if (mIsRightStart) {
       valueSineStart += getWidth();
     }
     mPath.reset();
     mPath.moveTo(valueSineStart, sineLineStartY);
     float valueSine;
-    while (index <= width * 4 / 3) {
-       valueSine = (float) (Math.sin((float) index / width * 1.5f * Math.PI + mTheta)
-          * amplitude + height - amplitude);
+    while (mSineIndex <= mSineWidth * 4 / 3) {
+      valueSine = (float) (Math.sin(mSineIndex / mSineWidth * 1.5f * Math.PI + mSineTheta)
+          * mAmplitude + mHeight - mAmplitude);
       if (mIsRightStart) {
         valueSine *= -1;
         valueSine += getWidth();
       }
-      mPath.lineTo(valueSine, sineLineStartY + index);
-      index++;
+      mPath.lineTo(valueSine, sineLineStartY + mSineIndex);
+      mSineIndex++;
     }
     mPath.lineTo(valueSineStart, sineLineStartY);
     mPath.close();
     mPaint.setAlpha((int) (190 * progress * 1.5f));
     canvas.drawPath(mPath, mPaint);
 
-    float midBackX = amplitude * 1.25f;
+    float midBackX = mAmplitude * 1.25f;
     float midBackY = mStartY;
 
     mPaintWhite.setAlpha((int) (255 * progress * 1.5f));
-    float lineLength = 15 * progress * 1.5f;
+    float lineLength = dip2px(5) * progress * 1.5f;
 
     if (mIsRightStart) {
       midBackX *= -1;
@@ -233,13 +231,13 @@ public class SwipeBackFrameLayout extends LinearLayout {
   }
 
   private void resetAll() {
-    mCurrentY = 0;
     mCurrentX = 0;
     mHasJudged = false;
     mStartY = 0;
     mStartX = 0;
     mDrawBack = false;
     progress = 0;
+    allowParentsInterceptTouchEvent(getParent());
   }
 
   private float calculateProgress() {
@@ -254,6 +252,10 @@ public class SwipeBackFrameLayout extends LinearLayout {
     return temp;
   }
 
+  private int dip2px (float dipValue) {
+    float scale = mContext.getResources().getDisplayMetrics().scaledDensity;
+    return (int) (dipValue * scale + 0.5f);
+  }
   public void setRightSwipeEnable(boolean enable) {
     this.mIsRightSwipeEnable = enable;
   }
