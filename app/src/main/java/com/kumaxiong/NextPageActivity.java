@@ -15,7 +15,7 @@ public class NextPageActivity extends AppCompatActivity {
   }
 
   private void initView () {
-    mMirrorSwipeBackLayout = MirrorSwipe.INSTANCE.attach(this,R.layout.swipe_back);
+    mMirrorSwipeBackLayout = MirrorSwipeBack.attach(this,R.layout.swipe_back);
     mMirrorSwipeBackLayout.setRightSwipeEnable(true);
     mMirrorSwipeBackLayout.setLeftSwipeEnable(true);
   }

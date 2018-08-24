@@ -1,11 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
-def group = 'com.kumaxiong.android'
-def version = '0.1.1'
+group = 'com.kumaxiong.android'
+version = '0.1.2'
 def artifactId = "mirror-swipeback-layout"
-
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -37,9 +36,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
+// 生成源jar
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.java.srcDirs
@@ -49,18 +48,69 @@ artifacts {
     archives sourcesJar
 }
 
-//上传到本地maven库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri('file:///Users/kumaxiong/local/repo/'))
-            pom.version = version
-            pom.artifactId = artifactId
-            pom.groupId = group
-        }
-    }
-}
+
+////上传到本地maven库
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: uri('file:///Users/kumaxiong/local/repo/'))
+//            pom.version = version
+//            pom.artifactId = artifactId
+//            pom.groupId = group
+//        }
+//    }
+//}
 repositories {
     mavenCentral()
 }
 
+
+def siteUrl = 'https://bintray.com/kumaxiong99/maven'      // 项目的主页
+def gitUrl = 'git@github.com:kumaxiong/MirrorSwipeBack.git'   // Git仓库的url
+// 根节点添加
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                name artifactId
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'kumaxiong99'
+                        name 'kumaxiong'
+                        email 'ywyy.xingyu@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = artifactId          // project name in jcenter
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
