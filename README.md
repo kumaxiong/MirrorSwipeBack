@@ -4,6 +4,7 @@
 1. 继承自LinearLayout,左右滑动出现返回动画。
 2. 默认设置左右两端都能够滑动,可以自行设置。（默认左右两侧）
 3. 可以自行设置回调事件（默认就是调用当前activity的finish）
+4. 项目类非常简单就俩类，一个Layout，一个辅助类：MirrorSwipeBack
 
 ![ezgif-1-7a33c98bc2.gif](https://upload-images.jianshu.io/upload_images/1549768-6cd15f7721e16281.gif?imageMogr2/auto-orient/strip)
 
