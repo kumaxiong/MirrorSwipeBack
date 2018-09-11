@@ -1,6 +1,7 @@
 package com.kumaxiong;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
+
+import kumaxiong.com.mirrorswipebacklayout.R;
 
 public class MirrorSwipeBackLayout extends FrameLayout {
 
@@ -57,6 +60,11 @@ public class MirrorSwipeBackLayout extends FrameLayout {
 
   public MirrorSwipeBackLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MirrorSwipeBackLayout);
+    boolean leftEnable = array.getBoolean(R.styleable.MirrorSwipeBackLayout_left_swipe,true);
+    boolean rightEnable = array.getBoolean(R.styleable.MirrorSwipeBackLayout_right_swipe,true);
+    setLeftSwipeEnable(leftEnable);
+    setRightSwipeEnable(rightEnable);
     mContext = context;
     initDrawTool();
   }

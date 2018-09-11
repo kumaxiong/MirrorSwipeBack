@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="MirrorSwipeBackLayout">
+    <attr name="left_swipe" format="boolean"/>
+    <attr name="right_swipe" format="boolean"/>
+  </declare-styleable>
+</resources>

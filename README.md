@@ -29,6 +29,21 @@
 ```
 
 
+```xml
+
+xml 中直接设置左右滑动是否开启
+
+<com.kumaxiong.MirrorSwipeBackLayout
+  android:id="@+id/mirror_swipe"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:mirror_attr= "http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  mirror_attr:left_swipe="true"
+  mirror_attr:right_swipe="false"
+  />
+```
+
 
 2.在需要使用的activity中的onCreate方法中加入:
 

@@ -18,8 +18,8 @@ public class NextPageActivity extends AppCompatActivity {
 
     private void initView() {
         mMirrorSwipeBackLayout = MirrorSwipeBack.attach(this, R.layout.swipe_back);
-        mMirrorSwipeBackLayout.setRightSwipeEnable(true);
-        mMirrorSwipeBackLayout.setLeftSwipeEnable(true);
+        // mMirrorSwipeBackLayout.setRightSwipeEnable(true);
+        // mMirrorSwipeBackLayout.setLeftSwipeEnable(true);
         mMirrorSwipeBackLayout.setSwipeBackListener(new MirrorSwipeBackLayout.OnSwipeBackListener() {
             @Override
             public void completeSwipeBack() {
